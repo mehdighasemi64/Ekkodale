@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Models.Ekkodale;
 using Neo4jClient;
 
 namespace Ekkodale.Controllers;

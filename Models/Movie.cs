@@ -1,4 +1,4 @@
-namespace Ekkodale;
+namespace Models.Ekkodale;
 public class Movie{ 
     public int movieID { get; set; }
     public string? title { get; set; }
