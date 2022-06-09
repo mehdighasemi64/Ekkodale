@@ -4,24 +4,29 @@ using Neo4jClient;
 
 namespace Ekkodale.Services
 {
-    public partial class PersonService : IPersonService
+    public class PersonService : IPersonService
     {
-        GraphClient _GraphClient = new GraphClient(new Uri("http://localhost:7474/"), "neo4j", "123456");
-        public PersonService()
+        // GraphClient _GraphClient = new GraphClient(new Uri("http://localhost:7474/"), "neo4j", "123456");
+        // public PersonService()
+        // {
+        //     _GraphClient.ConnectAsync().Wait();
+        // }
+        private readonly Neo4jService _neo4jService;
+        public PersonService(Neo4jService neo4jService)
         {
-            _GraphClient.ConnectAsync().Wait();
+            _neo4jService = neo4jService;
         }
         public async void CreatePerson(Person person)
         {
             var newPerson = person;
-            await _GraphClient.Cypher
+            await _neo4jService.client.Cypher
             .Create("(p:Person $newPerson)")
             .WithParam("newPerson", newPerson)
             .ExecuteWithoutResultsAsync();
         }
         public async void DeletePerson(string Name)
         {
-            await _GraphClient.Cypher
+            await _neo4jService.client.Cypher
            .Match("(p:Person)")
            .Where((Person p) => p.name == Name)
            .Delete("p")
@@ -29,7 +34,7 @@ namespace Ekkodale.Services
         }
         public async void UpdatePerson(string Name, string NewName)
         {
-            await _GraphClient.Cypher
+            await _neo4jService.client.Cypher
             .Match("(p:Person)")
             .Where((Person p) => p.name == Name)
             .Set("p.name = $NewName")
@@ -40,7 +45,7 @@ namespace Ekkodale.Services
         {
             try
             {
-                var results = await _GraphClient.Cypher
+                var results = await _neo4jService.client.Cypher
                     .Match("(p:Person)")
                     .Return(p => p.As<Person>())
                     .ResultsAsync;
@@ -56,7 +61,7 @@ namespace Ekkodale.Services
         {
             try
             {
-                var results = await _GraphClient.Cypher
+                var results = await _neo4jService.client.Cypher
                     .Match("(p:Person)")
                     .Where((Person p) => p.name.Contains(Name) || p.family.Contains(Family) || p.age == Age)
                     .Return(p => p.As<Person>())
@@ -71,7 +76,7 @@ namespace Ekkodale.Services
         }
         public async void CreateActingRelationship(string PersonName, string MovieTitle)
         {
-            await _GraphClient.Cypher
+            await _neo4jService.client.Cypher
             .Match("(p:Person)", "(m: Movie)")
             .Where((Person p) => p.name == PersonName)
             .AndWhere((Movie m) => m.title == MovieTitle)
@@ -80,12 +85,16 @@ namespace Ekkodale.Services
         }
         public async void CreateFriendShip(int PersonID, int PersonID2)
         {
-            await _GraphClient.Cypher
+            await _neo4jService.client.Cypher
             .Match("(p1:Person)", "(p2: Person)")
             .Where((Person p1) => p1.personID == PersonID)
             .AndWhere((Person p2) => p2.personID == PersonID2)
             .Create("(p1)-[F:Friends_With]->(p2)")
             .ExecuteWithoutResultsAsync();
+        }
+        ~PersonService()
+        {
+            _neo4jService.client.Dispose();
         }
     }
 }

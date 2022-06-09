@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ekkodale.Services
 {
-    public partial interface IPersonService
+    public interface IPersonService
     {    
         void CreatePerson(Person person);      
         void DeletePerson(string Name);

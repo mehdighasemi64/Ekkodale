@@ -19,53 +19,101 @@ public class Neo4JController : ControllerBase
     }
 
     [HttpPost]
-    public string CreatePerson(Person person)
+    public IActionResult CreatePerson(Person person)
     {
-         var newPerson = person;
-        _personService.CreatePerson(newPerson);
-        return "Person Created Successfully";
+        var newPerson = person;
+        try
+        {
+            _personService.CreatePerson(newPerson);
+             return StatusCode(201, "Person Created Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
     }
 
     [HttpPost("CreateActingRelationship")]
-    public string CreateActingRelationship(string PersonName, string MovieTitle)
+    public IActionResult CreateActingRelationship(string PersonName, string MovieTitle)
     {
-        _personService.CreateActingRelationship(PersonName, MovieTitle);
-        return "Actor and Movie Relationship Created Successfully";
-    }    
+        try
+        {
+            _personService.CreateActingRelationship(PersonName, MovieTitle);
+            return StatusCode(201,"Actor and Movie Relationship Created Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
+    }
 
     [HttpPost("CreateFriendShip")]
-    public string CreateFriendShip(int PersonID, int PersonID2)
+    public IActionResult CreateFriendShip(int PersonID, int PersonID2)
     {
-         _personService.CreateFriendShip(PersonID, PersonID);
-        return "Friendship Created Successfully";
-    }    
+        try
+        {
+            _personService.CreateFriendShip(PersonID, PersonID);
+            return StatusCode(201, "Friendship Created Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
+    }
 
     [HttpGet]
     public async Task<List<Person>> GetAllPerson()
     {
-        List<Person> lstPerson = await _personService.GetAllPerson();
-        return lstPerson;
+        try
+        {
+            List<Person> lstPerson = await _personService.GetAllPerson();
+            return lstPerson;
+        }
+        catch (System.Exception e)
+        {
+            return new List<Person>();
+        }
     }
 
     [HttpDelete]
-    public string DeletePerson(string Name)
+    public IActionResult DeletePerson(string Name)
     {
-        _personService.DeletePerson(Name);
-        return "Person Removed Successfully";
+        try
+        {
+            _personService.DeletePerson(Name);
+            return StatusCode(201, "Person Removed Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
     }
 
     [HttpPatch]
-    public string UpdatePerson(string Name , string NewName)
+    public IActionResult UpdatePerson(string Name, string NewName)
     {
-        _personService.UpdatePerson(Name , NewName);
-        return "Person Updated Successfully";
+        try
+        {
+            _personService.UpdatePerson(Name, NewName);
+            return StatusCode(201 , "Person Updated Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
     }
-    
-    [HttpGet("SearchByParam/{Name}/{Family}/{Age}")]
-    public async Task<List<Person>> Search(string Name="", string Family="", int Age=0)
-    {
-        List<Person> lstPerson = await _personService.Search(Name, Family, Age);
 
-        return lstPerson;
+    [HttpGet("SearchByParam/{Name}/{Family}/{Age}")]
+    public async Task<List<Person>> Search(string Name = "", string Family = "", int Age = 0)
+    {
+        try
+        {
+            List<Person> lstPerson = await _personService.Search(Name, Family, Age);
+            return lstPerson;
+        }
+        catch (System.Exception e)
+        {
+            return new List<Person>();
+        }
     }
 }
