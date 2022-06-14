@@ -12,5 +12,7 @@ namespace Ekkodale.Services
         Task<List<Person>> Search(string Name="", string Family="", int Age=0);
         void CreateActingRelationship(string PersonName, string MovieTitle);
         void CreateFriendShip(int PersonID, int PersonID2);
+        void DeleteFriendShip(int PersonID, int PersonID2);
+        void CreateRelationship(string PersonName, string MovieTitle, string RelationshipType);
     }
 }

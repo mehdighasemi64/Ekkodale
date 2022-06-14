@@ -26,17 +26,30 @@ namespace Ekkodale.Services
         }
         public async void DeletePerson(string Name)
         {
-            await _neo4jService.client.Cypher
-           .Match("(p:Person)")
-           .Where((Person p) => p.name == Name)
-           .Delete("p")
-           .ExecuteWithoutResultsAsync();
+            //     await _neo4jService.client.Cypher  // delete a Person without any relationship
+            //    .Match("(p:Person)")
+            //    .Where((Person p) => p.name == Name)
+            //    .Delete("p")
+            //    .ExecuteWithoutResultsAsync();
+
+            //  await _neo4jService.client.Cypher // delete a person with incoming relationship
+            //    .OptionalMatch("(p:Person)<-[r]-()")
+            //    .Where((Person p) => p.name == Name)
+            //    .Delete("r, p")
+            //    .ExecuteWithoutResultsAsync();
+
+            await _neo4jService.client.Cypher // delete person and movie and relationship between them
+             .OptionalMatch("(p)-[r]->(m:Movie)")
+             .Where((Person p) => p.Name == Name)
+             .Delete("r,p,m")
+             .ExecuteWithoutResultsAsync();
+
         }
         public async void UpdatePerson(string Name, string NewName)
         {
             await _neo4jService.client.Cypher
             .Match("(p:Person)")
-            .Where((Person p) => p.name == Name)
+            .Where((Person p) => p.Name == Name)
             .Set("p.name = $NewName")
             .WithParam("NewName", NewName)
             .ExecuteWithoutResultsAsync();
@@ -63,7 +76,7 @@ namespace Ekkodale.Services
             {
                 var results = await _neo4jService.client.Cypher
                     .Match("(p:Person)")
-                    .Where((Person p) => p.name.Contains(Name) || p.family.Contains(Family) || p.age == Age)
+                    .Where((Person p) => p.Name.Contains(Name) || p.Family.Contains(Family) || p.Age == Age)
                     .Return(p => p.As<Person>())
                     .ResultsAsync;
 
@@ -78,8 +91,8 @@ namespace Ekkodale.Services
         {
             await _neo4jService.client.Cypher
             .Match("(p:Person)", "(m: Movie)")
-            .Where((Person p) => p.name == PersonName)
-            .AndWhere((Movie m) => m.title == MovieTitle)
+            .Where((Person p) => p.Name == PersonName)
+            .AndWhere((Movie m) => m.Title == MovieTitle)
             .Create("(p)-[A:Acting_In]->(m)")
             .ExecuteWithoutResultsAsync();
         }
@@ -87,15 +100,56 @@ namespace Ekkodale.Services
         {
             await _neo4jService.client.Cypher
             .Match("(p1:Person)", "(p2: Person)")
-            .Where((Person p1) => p1.personID == PersonID)
-            .AndWhere((Person p2) => p2.personID == PersonID2)
+            .Where((Person p1) => p1.PersonID == PersonID)
+            .AndWhere((Person p2) => p2.PersonID == PersonID2)
             .Create("(p1)-[F:Friends_With]->(p2)")
             .ExecuteWithoutResultsAsync();
         }
-        ~PersonService()
+        public async void DeleteFriendShip(int PersonID, int PersonID2)
         {
-            _neo4jService.client.Dispose();
+            await _neo4jService.client.Cypher
+            .Match("root-[:Friends_With]->user-[r]->friend")
+            .Where((Person p1) => p1.PersonID == PersonID)
+            .AndWhere((Person p2) => p2.PersonID == PersonID2)
+            .Delete("(p1)-[Friends_With]->(p2)")
+            .ExecuteWithoutResultsAsync();
+        }        
+        public async void CreateRelationship(string PersonName, string MovieTitle, string RelationshipType)
+        {
+            switch (RelationshipType)
+            {
+                case "Acting":
+                    await _neo4jService.client.Cypher
+                               .Match("(p:Person)", "(m: Movie)")
+                               .Where((Person p) => p.Name == PersonName)
+                               .AndWhere((Movie m) => m.Title == MovieTitle)
+                               .Create("(p)-[A:Acting_In]->(m)")
+                               .ExecuteWithoutResultsAsync();
+                    break;
+                case "Producing":
+                    await _neo4jService.client.Cypher
+                                   .Match("(p:Person)", "(m: Movie)")
+                                   .Where((Person p) => p.Name == PersonName)
+                                   .AndWhere((Movie m) => m.Title == MovieTitle)
+                                   .Create("(p)-[c:Producing_It]->(m)")
+                                   .ExecuteWithoutResultsAsync();
+                    break;
+                case "ِDirecting":
+                    await _neo4jService.client.Cypher
+                                   .Match("(p:Person)", "(m: Movie)")
+                                   .Where((Person p) => p.Name == PersonName)
+                                   .AndWhere((Movie m) => m.Title == MovieTitle)
+                                   .Create("(p)-[d:Directing_It]->(m)")
+                                   .ExecuteWithoutResultsAsync();
+                    break;
+                default: break;
+            }
         }
+
+        // ~PersonService()
+        // {
+        //     _neo4jService.client.Dispose();
+        // }
     }
 }
 

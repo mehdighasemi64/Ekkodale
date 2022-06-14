@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IPersonService, PersonService>();
+builder.Services.AddSingleton<IMovieService, MovieService>();
 
 builder.Services.Configure<Neo4jDatabaseSettings>(
                            builder.Configuration.GetSection(nameof(Neo4jDatabaseSettings)));

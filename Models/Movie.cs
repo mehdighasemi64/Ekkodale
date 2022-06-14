@@ -1,6 +1,6 @@
 namespace Models.Ekkodale;
 public class Movie{ 
-    public int movieID { get; set; }
-    public string? title { get; set; }
-    public int year { get; set; }
+    public int MovieID { get; set; }
+    public string? Title { get; set; }
+    public int Year { get; set; }
 }

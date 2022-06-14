@@ -7,14 +7,12 @@ namespace Ekkodale.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class Neo4JController : ControllerBase
+public class PersonNeo4JController : ControllerBase
 {
-    private readonly ILogger<NeoController> _logger;
     private readonly IPersonService _personService;
 
-    public Neo4JController(ILogger<NeoController> logger, IPersonService personService)
+    public PersonNeo4JController(IPersonService personService)
     {
-        _logger = logger;
         _personService = personService;
     }
 
@@ -61,6 +59,33 @@ public class Neo4JController : ControllerBase
         }
     }
 
+    [HttpPost("CreateRelationship")]
+    public IActionResult CreateRelationship(String PersonName, string MovieTitle, string RelationshipType)
+    {
+        try
+        {
+            _personService.CreateRelationship(PersonName, MovieTitle, RelationshipType);
+            return StatusCode(201, "Relationship Created Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
+    }
+
+    [HttpDelete("DeleteFriendShip")]
+    public IActionResult DeleteFriendShip(int PersonID, int PersonID2)
+    {
+        try
+        {
+            _personService.DeleteFriendShip(PersonID, PersonID);
+            return StatusCode(201, "Friendship Removed Successfully");
+        }
+        catch (System.Exception e)
+        {
+            return StatusCode(501, e.Message);
+        }
+    }
     [HttpGet]
     public async Task<List<Person>> GetAllPerson()
     {
